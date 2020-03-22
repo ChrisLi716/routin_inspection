@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- This is list of customers -->
+<config_list>
+    <base_path>../</base_path>
+    <config name="select_buy_user">
+        <biz_email>
+            <to>xx@163.com</to>
+            <cc>cc@cc.com</cc>
+        </biz_email>
+        <tech_email>
+            <to>lilunlogic@163.com</to>
+            <cc>lilunlogic@163.com</cc>
+        </tech_email>
+        <sql><![CDATA[select * from t_dg_buy_user]]></sql>
+        <comment>查询所有注册用户信息</comment>
+        <file_name>users.xlsx</file_name>
+    </config>
+
+    <config name="select_new_buy_user">
+        <biz_email>
+            <to>xx@163.com</to>
+            <cc>cc@cc.com</cc>
+        </biz_email>
+        <tech_email>
+            <to>lilunlogic@163.com</to>
+            <cc>lilunlogic@163.com</cc>
+        </tech_email>
+        <sql><![CDATA[
+            SELECT
+              *
+            FROM
+              t_dg_buy_user t, t_dg_invitation_code c
+            WHERE
+              im_token IS NOT NULL
+              AND t.create_date >= DATE_FORMAT('2020-01-23 00:00:00', '%Y-%m-%d %H:%k:%s')
+              AND t.create_date <= DATE_FORMAT('2020-01-23 23:59:00', '%Y-%m-%d %H:%k:%s')
+                AND t.buy_mobile = c.mobile
+            ORDER BY
+             t.create_date DESC]]>
+        </sql>
+        <comment>查询每天新注册用户信息</comment>
+        <file_name>daily_new_user.xlsx</file_name>
+    </config>
+
+</config_list>
