@@ -4,19 +4,20 @@
     <base_path>../</base_path>
     <config name="select_buy_user">
         <biz_email>
-            <to>xx@163.com</to>
-            <cc>cc@cc.com</cc>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
         </biz_email>
         <tech_email>
-            <to>lilunlogic@163.com</to>
-            <cc>lilunlogic@163.com</cc>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
         </tech_email>
-        <sql><![CDATA[select * from t_dg_buy_user]]></sql>
+        <sql><![CDATA[select id, username, buy_name, buy_mobile from t_dg_buy_user]]></sql>
         <comment>查询所有注册用户信息</comment>
         <file_name>users.xlsx</file_name>
+        <scheduler></scheduler>
     </config>
 
-    <config name="select_new_buy_user">
+    <!--<config name="select_new_buy_user">
         <biz_email>
             <to>xx@163.com</to>
             <cc>cc@cc.com</cc>
@@ -40,6 +41,6 @@
         </sql>
         <comment>查询每天新注册用户信息</comment>
         <file_name>daily_new_user.xlsx</file_name>
-    </config>
+    </config>-->
 
 </config_list>

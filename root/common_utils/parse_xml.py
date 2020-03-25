@@ -1,9 +1,15 @@
-from lxml import etree
 import re
 import traceback
+from lxml import etree
 
 from root.beans.sqlbean import SqlBean
 from root.common_utils.log_util import Logger
+
+
+
+
+
+
 
 
 class ParseXml:
@@ -14,6 +20,7 @@ class ParseXml:
         try:
             sqlbean_list = []
             # parse = etree.parse("./sql.xml", etree.XMLParser())
+            ParseXml.logger.info("file_path:" + file_path)
             parse = etree.parse(file_path, etree.XMLParser())
             ele_config_list = parse.xpath("//config")
             biz_email_to = ""
@@ -44,3 +51,7 @@ class ParseXml:
 
         except Exception:
             ParseXml.logger.error(traceback.format_exc())
+
+
+if __name__ == '__main__':
+    ParseXml.parsexml2bean("../sources/sql.xml")

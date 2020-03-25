@@ -9,7 +9,7 @@ import os
 class EmailUtils(object):
 
     @staticmethod
-    def build_content(sender, receiver, subject, body):
+    def build_content(sender, receiver, cc, subject, body):
         # 设置邮件正文，这里是支持HTML的
         # 设置正文为符合邮件格式的HTML内容
         m = MIMEText(_text=body, _subtype='html', _charset='utf-8')
@@ -20,10 +20,12 @@ class EmailUtils(object):
         # 设置接收人
         m['to'] = receiver
 
+        m['cc'] = cc
+
         return m
 
     @staticmethod
-    def build_attach_file(text_content, sender, receiver, subject, files_tuple):
+    def build_attach_file(text_content, sender, receiver, cc, subject, files_tuple):
         m = MIMEMultipart()
         m.attach(text_content)
 
@@ -38,6 +40,7 @@ class EmailUtils(object):
         m['Subject'] = subject
         m['from'] = sender
         m['to'] = receiver
+        m['cc'] = cc
 
         return m
 
@@ -61,7 +64,7 @@ class EmailUtils(object):
         return m
 
     @staticmethod
-    def sent_email(receiver, subject, body, file_tuple):
+    def sent_email(receiver, cc, subject, body, file_tuple):
         # 设置发件服务器地址
         host = 'smtp.163.com'
         # 设置发件服务器端口号。注意，这里有SSL和非SSL两种形式，现在一般是SSL方式
@@ -73,8 +76,8 @@ class EmailUtils(object):
         # 设置发件邮箱的授权码密码，根据163邮箱提示，登录第三方邮件客户端需要授权码
         pwd = 'Lilun32768+'
 
-        m = EmailUtils.build_content(sender, receiver, subject, body)
-        m = EmailUtils.build_attach_file(m, sender, receiver, subject, file_tuple)
+        m = EmailUtils.build_content(sender, receiver, cc, subject, body)
+        m = EmailUtils.build_attach_file(m, sender, receiver, cc, subject, file_tuple)
         # m = test_attach_email()
         try:
             s = smtplib.SMTP(host, non_ssl_port)
@@ -84,10 +87,10 @@ class EmailUtils(object):
             s.login(sender, pwd)
             s.sendmail(sender, receiver, m.as_string())
             # 发送邮件！
-            print('Done.sent email success')
+            print('Done. sent email success')
             s.quit()
         except smtplib.SMTPException:
-            print('Error.sent email fail', traceback.print_exc())
+            print('Error. sent email fail', traceback.print_exc())
 
 
 if __name__ == '__main__':

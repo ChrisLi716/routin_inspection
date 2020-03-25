@@ -3,19 +3,21 @@ from mysql import connector
 
 class Connection(object):
     __mydb = connector.connect(
-        host="192.168.64.128",
+        host="192.168.1.20",
         user="root",
-        passwd="65536",
-        database="mysql"
+        passwd="123456",
+        database="dg"
     )
 
     @classmethod
     def mycursor(cls):
         return cls.__mydb.cursor()
 
-# mycursor.execute("SHOW TABLES")
-# for x in mycursor:
-#     print(x)
+
+mycursor = Connection.mycursor()
+mycursor.execute("SHOW TABLES")
+for x in mycursor:
+    print(x)
 
 # mycursor.execute("select * from t_dg_buy_user")
 # fileds = mycursor.description
