@@ -14,10 +14,10 @@ class Connection(object):
         return cls.__mydb.cursor()
 
 
-mycursor = Connection.mycursor()
-mycursor.execute("SHOW TABLES")
-for x in mycursor:
-    print(x)
+# mycursor = Connection.mycursor()
+# mycursor.execute("SHOW TABLES")
+# for x in mycursor:
+#     print(x)
 
 # mycursor.execute("select * from t_dg_buy_user")
 # fileds = mycursor.description

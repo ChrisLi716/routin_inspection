@@ -54,6 +54,7 @@ class ExcelGenerator(object):
                     sheet.append(data)
 
             wb.save(file_path)
+            ExcelGenerator.logger.info("save excel " + file_path + " success")
             return True
         except Exception:
             ExcelGenerator.logger.error(traceback.format_exc())

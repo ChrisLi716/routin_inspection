@@ -12,8 +12,8 @@ class Logger(object):
     __id_simple_format = '[%(levelname)s][%(asctime)s] %(message)s'
 
     # log文件名
-    # logfile_path_staff = r'C:\Users\Administrator\Desktop\log\routin_inspection.log'
-    __logfile_path_staff = r'D:\Python\python_workspace\routin_insepection.log'
+    __logfile_path_staff = r'C:\Users\Administrator\Desktop\log\routin_inspection.log'
+    # __logfile_path_staff = r'D:\Python\python_workspace\routin_insepection.log'
 
     # log配置字典
     # LOGGING_DIC第一层的所有的键不能改变

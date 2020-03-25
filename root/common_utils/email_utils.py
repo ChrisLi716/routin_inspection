@@ -5,8 +5,11 @@ from email.mime.multipart import MIMEMultipart
 import traceback
 import os
 
+from root.common_utils.log_util import Logger
+
 
 class EmailUtils(object):
+    logger = Logger.get_instance()
 
     @staticmethod
     def build_content(sender, receiver, cc, subject, body):
@@ -19,7 +22,6 @@ class EmailUtils(object):
         m['from'] = sender
         # 设置接收人
         m['to'] = receiver
-
         m['cc'] = cc
 
         return m
@@ -28,11 +30,10 @@ class EmailUtils(object):
     def build_attach_file(text_content, sender, receiver, cc, subject, files_tuple):
         m = MIMEMultipart()
         m.attach(text_content)
-
+        EmailUtils.logger.info("files_tuple:" + str(files_tuple))
         for file in files_tuple:
             file_name = os.path.basename(file)
-            print(file)
-            print(file_name)
+            EmailUtils.logger.info("build_attach_file:filename " + file)
             file_apart = MIMEApplication(open(file, "rb").read())
             file_apart.add_header('Content-Disposition', 'attachment', filename=file_name)
             m.attach(file_apart)
