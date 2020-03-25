@@ -7,3 +7,5 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple openpyxl
 
 #解决logging模块多个进程往同一个文件写日志的问题
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple concurrent-log-handler
+
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple apscheduler

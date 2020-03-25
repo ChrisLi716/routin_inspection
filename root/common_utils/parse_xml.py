@@ -41,7 +41,10 @@ class ParseXml:
                     sql = re.sub("[\\s]+", " ", sql)
 
                 comment = ele_config.find("./comment").text
-                sqlbean = SqlBean(config_name, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc, sql, comment)
+                scheduler = ele_config.find("./scheduler").text
+
+                sqlbean = SqlBean(config_name, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc, sql, comment,
+                                  scheduler)
                 ParseXml.logger.info("sqlbean: " + sqlbean.__str__())
                 sqlbean_list.append(sqlbean)
                 ParseXml.logger.info("sqlbean_list size:" + str(len(sqlbean_list)))

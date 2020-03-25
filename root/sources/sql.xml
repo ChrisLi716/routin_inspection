@@ -12,7 +12,7 @@
         </tech_email>
         <sql><![CDATA[select id, username, buy_name, buy_mobile from t_dg_buy_user]]></sql>
         <comment>查询所有注册用户信息</comment>
-        <scheduler></scheduler>
+        <scheduler>*/2 * * * *</scheduler>
     </config>
 
     <config name="new_user">
@@ -38,6 +38,7 @@
              t.create_date DESC]]>
         </sql>
         <comment>查询每天新注册用户信息</comment>
+        <scheduler>*/2 * * * *</scheduler>
     </config>
 
 </config_list>
