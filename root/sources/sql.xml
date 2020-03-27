@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- This is list of customers -->
 <config_list>
-    <config name="all_user">
+    <config name="get_all_user">
         <biz_email>
             <to>chris.li@allsale.site</to>
             <cc>chris.li@allsale.site</cc>
@@ -12,10 +12,9 @@
         </tech_email>
         <sql><![CDATA[select id, username, buy_name, buy_mobile from t_dg_buy_user]]></sql>
         <comment>查询所有注册用户信息</comment>
-        <scheduler>*/2 * * * *</scheduler>
+        <scheduler>* * * * *</scheduler>
     </config>
-
-    <config name="new_user">
+    <config name="get_daily_new_user">
         <biz_email>
             <to>chris.li@allsale.site</to>
             <cc>chris.li@allsale.site</cc>
@@ -38,7 +37,7 @@
              t.create_date DESC]]>
         </sql>
         <comment>查询每天新注册用户信息</comment>
-        <scheduler>*/2 * * * *</scheduler>
+        <scheduler>* * * * *</scheduler>
     </config>
 
 </config_list>
