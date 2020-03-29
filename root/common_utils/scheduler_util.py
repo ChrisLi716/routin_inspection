@@ -4,6 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import traceback
 from datetime import datetime
+import time
 
 
 class SchedulerUtil:
@@ -12,7 +13,7 @@ class SchedulerUtil:
     scheduler = BackgroundScheduler()
 
     @staticmethod
-    def cron_job(func, crontab_exp, scheduler_name, **args):
+    def cron_job(func, crontab_exp, scheduler_name, args=None):
         try:
             SchedulerUtil.scheduler.add_job(func, CronTrigger.from_crontab(crontab_exp), args,
                                             id=scheduler_name + str(datetime.now()))
@@ -23,8 +24,10 @@ class SchedulerUtil:
 
     @staticmethod
     def test_job():
-        print("1111")
+        print("for testing purpose")
 
 
 if __name__ == '__main__':
     SchedulerUtil.cron_job(func=SchedulerUtil.test_job, crontab_exp="* * * * *", scheduler_name="test_job")
+    SchedulerUtil.scheduler.start()
+    time.sleep(30 * 60)

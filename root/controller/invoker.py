@@ -1,6 +1,24 @@
 from root.controller.dispatcher import Dispatcher
 import time
+import threading
+from threading import Thread, Lock
+
+
+class MyThread(Thread):
+    __thread_lock = Lock()
+
+    def __init__(self, name):
+        threading.Thread.__init__(self)
+        self.name = name
+
+    def run(self):
+        print(self.name)
+        self.__thread_lock.acquire()
+        Dispatcher.assign_to_scheduler()
+
 
 if __name__ == '__main__':
-    Dispatcher.assign_to_scheduler()
-    time.sleep(30 * 60)
+    while True:
+        thread = MyThread("MyThread")
+        thread.start()
+        thread.join()
