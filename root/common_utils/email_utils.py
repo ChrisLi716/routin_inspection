@@ -1,6 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+from root.common_utils.settings_util import SettingsUtil
 from email.mime.multipart import MIMEMultipart
 import traceback
 import os
@@ -10,6 +11,7 @@ from root.common_utils.log_util import Logger
 
 class EmailUtils(object):
     logger = Logger.get_instance()
+    __settings = SettingsUtil.get_instance()
 
     @staticmethod
     def build_content(sender, receiver, cc, subject, body):
@@ -64,18 +66,18 @@ class EmailUtils(object):
 
         return m
 
-    @staticmethod
-    def sent_email(receiver, cc, subject, body, file_tuple):
+    @classmethod
+    def sent_email(cls, receiver, cc, subject, body, file_tuple):
         # 设置发件服务器地址
-        host = 'smtp.163.com'
+        host = cls.__settings.email_host
         # 设置发件服务器端口号。注意，这里有SSL和非SSL两种形式，现在一般是SSL方式
-        non_ssl_port = 25
-        # ssl_port = 465
+        non_ssl_port = cls.__settings.email_non_ssl_port
+        # ssl_port = cls.__settings.email_ssl_port
 
         # 设置发件邮箱，一定要自己注册的邮箱
-        sender = 'lilunlogic@163.com'
+        sender = cls.__settings.email_sender
         # 设置发件邮箱的授权码密码，根据163邮箱提示，登录第三方邮件客户端需要授权码
-        pwd = 'Lilun32768+'
+        pwd = cls.__settings.email_pwd
 
         m = EmailUtils.build_content(sender, receiver, cc, subject, body)
         m = EmailUtils.build_attach_file(m, sender, receiver, cc, subject, file_tuple)

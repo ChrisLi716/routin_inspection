@@ -1,14 +1,16 @@
 from mysql import connector
 from threading import Lock
+from root.common_utils.settings_util import SettingsUtil
 
 
 class Connection(object):
+    __settings = SettingsUtil.get_instance()
     __thread_lock = Lock()
     __mydb = connector.connect(
-        host="192.168.1.20",
-        user="root",
-        passwd="123456",
-        database="dg"
+        host=__settings.mysql_host,
+        user=__settings.mysql_user,
+        passwd=__settings.mysql_pwd,
+        database=__settings.mysql_db
     )
 
     __cursor = None
