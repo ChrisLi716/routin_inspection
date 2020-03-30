@@ -80,16 +80,16 @@ class ParseXml:
                     tech_email_to = tech_email[0].find("./to").text
                     tech_email_cc = tech_email[0].find("./cc").text
 
-                sql = ele_config.find("./sql").text
+                comment = ele_config.find("./comment").text
+                email_body = ele_config.find("./email_body").text
 
+                sql = ele_config.find("./sql").text
                 if sql:
                     sql = re.sub("[\\s]+", " ", sql)
 
-                comment = ele_config.find("./comment").text
                 scheduler = ele_config.find("./scheduler").text
-
                 sqlbean = SqlBean(config_name, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc, sql, comment,
-                                  scheduler)
+                                  email_body, scheduler)
                 ParseXml.logger.info("sqlbean: " + sqlbean.__str__())
                 sqlbean_list.append(sqlbean)
                 ParseXml.logger.info("sqlbean_list size:" + str(len(sqlbean_list)))
@@ -101,5 +101,5 @@ class ParseXml:
 
 
 if __name__ == '__main__':
-    # ParseXml.parsexml2bean("../sources/sql.xml")
-    ParseXml.parse2sqlbean_by_attr_name("../sources/sql.xml", "get_all_user")
+    ParseXml.parsexml2bean("../sources/sql.xml")
+    # ParseXml.parse2sqlbean_by_attr_name("../sources/sql.xml", "get_all_user")

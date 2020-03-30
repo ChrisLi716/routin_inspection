@@ -23,8 +23,10 @@ class EmailUtils(object):
         # 设置发送人
         m['from'] = sender
         # 设置接收人
-        m['to'] = receiver
-        m['cc'] = cc
+        if receiver:
+            m['to'] = receiver
+        if cc:
+            m['cc'] = cc
 
         return m
 
@@ -42,8 +44,10 @@ class EmailUtils(object):
 
         m['Subject'] = subject
         m['from'] = sender
-        m['to'] = receiver
-        m['cc'] = cc
+        if receiver:
+            m['to'] = receiver
+        if cc:
+            m['cc'] = cc
 
         return m
 

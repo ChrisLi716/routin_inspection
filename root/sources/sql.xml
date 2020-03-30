@@ -10,8 +10,9 @@
             <to>demon.zhou@allsale.site</to>
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
-        <sql><![CDATA[select id, username, buy_name, buy_mobile from t_dg_buy_user]]></sql>
         <comment>查询所有注册用户信息</comment>
+        <email_body>查询所有注册用户信息共{}条，见附件</email_body>
+        <sql><![CDATA[select id, username, buy_name, buy_mobile from t_dg_buy_user]]></sql>
         <scheduler>* * * * *</scheduler>
     </config>
     <config name="get_daily_new_user">
@@ -23,6 +24,8 @@
             <to>demon.zhou@allsale.site</to>
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
+        <comment>查询每天新注册用户信息</comment>
+        <email_body>查询到昨天注册用户信息共{}条，见附件</email_body>
         <sql><![CDATA[
             SELECT
               t.id, t.username, t.buy_name, t.buy_mobile
@@ -36,7 +39,6 @@
             ORDER BY
              t.create_date DESC]]>
         </sql>
-        <comment>查询每天新注册用户信息</comment>
         <scheduler>* * * * *</scheduler>
     </config>
 

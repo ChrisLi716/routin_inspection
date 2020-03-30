@@ -1,7 +1,7 @@
 import os
 from root.common_utils.log_util import Logger
 from root.common_utils.parse_xml import ParseXml
-# from root.mysql_opt.connection import Connection
+from root.mysql_opt.connection import Connection
 from root.common_utils.excel_util import ExcelGenerator
 from root.common_utils.email_utils import EmailUtils
 from root.common_utils.scheduler_util import SchedulerUtil
@@ -15,16 +15,6 @@ class Dispatcher:
     __xml_file_path = __base_path + os.sep + "/sql.xml"
     __excel_extension = ".xlsx"
 
-    # @classmethod
-    # def get_all_user(cls, sqlbean):
-    #     print("get_all_user")
-    #     # cls.__tackle_routin_inspection(sqlbean)
-    #
-    # @classmethod
-    # def get_daily_new_user(cls, sqlbean):
-    #     print("get_daily_new_user")
-    #     # cls.__tackle_routin_inspection(sqlbean)
-
     @classmethod
     def __tackle_routin_inspection_for_each_config(cls, sqlbean):
         if sqlbean:
@@ -37,18 +27,25 @@ class Dispatcher:
             header = Dispatcher.__build_header(sqlbean.sql)
 
             comment = sqlbean.comment
-            file_path = cls.__base_path + os.sep + file_name + cls.__excel_extension
+            email_body = sqlbean.email_body
+
+            file_path = cls.__base_path + os.sep + file_name + datetime.now().strftime(
+                "%y%m%d%H%M%S%f") + cls.__excel_extension
             cls.logger.info("going to generate excel file:" + file_path)
-            # cursor = Connection.mycursor()
-            # cursor.execute(sql)
-            # result_set = cursor.fetchall()
-            # cls.logger.info("sql:" + sql + ", size:" + str(len(result_set)))
-            # if result_set:
-            #     generate_excel_succeed = ExcelGenerator.generate_excel_file(header, result_set, file_path)
-            #     file_tuple = (file_path,)
-            #     if generate_excel_succeed:
-            #         EmailUtils.sent_email(biz_email_to, biz_email_cc, comment, "", file_tuple)
-            #         EmailUtils.sent_email(tech_email_to, tech_email_cc, comment, "", file_tuple)
+            cursor = Connection.mycursor()
+            cursor.execute(sql)
+            result_set = cursor.fetchall()
+            cls.logger.info("sql:" + sql + ", size:" + str(len(result_set)))
+            if result_set:
+                generate_excel_succeed = ExcelGenerator.generate_excel_file(header, result_set, file_path)
+                file_tuple = (file_path,)
+                if generate_excel_succeed:
+                    if biz_email_to:
+                        EmailUtils.sent_email(biz_email_to, biz_email_cc, comment, email_body.format(len(result_set)),
+                                              file_tuple)
+                    if tech_email_to:
+                        EmailUtils.sent_email(tech_email_to, tech_email_cc, comment, email_body.format(len(result_set)),
+                                              file_tuple)
 
     @classmethod
     def __build_header(cls, sql_tmp):
@@ -57,7 +54,22 @@ class Dispatcher:
             sql_tmp = str(sql_tmp).lower()
             begin_index = sql_tmp.index("select") + 7
             end_index = sql_tmp.index("from") - 1
-            excel_file_header = sql_tmp[begin_index: end_index].strip().split(", ")
+            header_list = sql_tmp[begin_index: end_index].strip().split(", ")
+
+            excel_file_header = []
+            for i in header_list:
+                tmp = header_list[i]
+                if "as" in tmp:
+                    as_index = tmp.index("as") + 3
+                    header = tmp[as_index: len(tmp)]
+                elif "." in tmp:
+                    dot_index = tmp.index(".") + 1
+                    header = tmp[dot_index:len(tmp)]
+                else:
+                    header = tmp
+
+                excel_file_header.append(header)
+
             cls.logger.info("header:" + str(excel_file_header))
         return excel_file_header
 
