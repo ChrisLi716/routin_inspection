@@ -1,5 +1,4 @@
 from root.controller.dispatcher import Dispatcher
-import time
 import threading
 from threading import Thread, Lock
 
@@ -12,7 +11,6 @@ class MyThread(Thread):
         self.name = name
 
     def run(self):
-        print(self.name)
         self.__thread_lock.acquire()
         Dispatcher.assign_to_scheduler()
 

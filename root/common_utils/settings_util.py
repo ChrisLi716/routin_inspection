@@ -11,20 +11,19 @@ class SettingsUtil:
     __const.MYSQL_SECTION = "mysql"
     __const.EMAIL_SECTION = "email"
 
-    @classmethod
-    def init_settings(cls):
+    def __init__(self):
         config = ConfigParser()
         config.read("../sources/settings.ini")
-        cls.mysql_host = config.get(cls.__const.MYSQL_SECTION, "host")
-        cls.mysql_user = config.get(cls.__const.MYSQL_SECTION, "user")
-        cls.mysql_pwd = config.get(cls.__const.MYSQL_SECTION, "passwd")
-        cls.mysql_db = config.get(cls.__const.MYSQL_SECTION, "database")
+        self.mysql_host = config.get(self.__const.MYSQL_SECTION, "host")
+        self.mysql_user = config.get(self.__const.MYSQL_SECTION, "user")
+        self.mysql_pwd = config.get(self.__const.MYSQL_SECTION, "passwd")
+        self.mysql_db = config.get(self.__const.MYSQL_SECTION, "database")
 
-        cls.email_host = config.get(cls.__const.EMAIL_SECTION, "host")
-        cls.email_sender = config.get(cls.__const.EMAIL_SECTION, "sender")
-        cls.email_pwd = config.get(cls.__const.EMAIL_SECTION, "pwd")
-        cls.email_non_ssl_port = config.get(cls.__const.EMAIL_SECTION, "non_ssl_port")
-        cls.email_ssl_port = config.get(cls.__const.EMAIL_SECTION, "ssl_port")
+        self.email_host = config.get(self.__const.EMAIL_SECTION, "host")
+        self.email_sender = config.get(self.__const.EMAIL_SECTION, "sender")
+        self.email_pwd = config.get(self.__const.EMAIL_SECTION, "pwd")
+        self.email_non_ssl_port = config.get(self.__const.EMAIL_SECTION, "non_ssl_port")
+        self.email_ssl_port = config.get(self.__const.EMAIL_SECTION, "ssl_port")
 
     @classmethod
     def get_instance(cls):
@@ -34,6 +33,6 @@ class SettingsUtil:
 
 
 if __name__ == '__main__':
-    SettingsUtil.init_settings()
-    print(SettingsUtil.mysql_host)
-    print(SettingsUtil.email_host)
+    settings = SettingsUtil()
+    print(settings.mysql_host)
+    print(settings.email_host)

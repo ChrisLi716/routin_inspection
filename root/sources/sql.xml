@@ -34,7 +34,7 @@
             WHERE
               im_token IS NOT NULL
               AND t.create_date >= DATE_FORMAT('2020-01-23 00:00:00', '%Y-%m-%d %H:%k:%s')
-              AND t.create_date <= DATE_FORMAT('2020-01-23 23:59:00', '%Y-%m-%d %H:%k:%s')
+              AND t.create_date <= DATE_FORMAT('2020-02-29 23:59:00', '%Y-%m-%d %H:%k:%s')
                 AND t.buy_mobile = c.mobile
             ORDER BY
              t.create_date DESC]]>

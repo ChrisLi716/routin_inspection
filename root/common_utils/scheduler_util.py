@@ -15,8 +15,9 @@ class SchedulerUtil:
     @staticmethod
     def cron_job(func, crontab_exp, scheduler_name, args=None):
         try:
-            SchedulerUtil.scheduler.add_job(func, CronTrigger.from_crontab(crontab_exp), args,
-                                            id=scheduler_name + str(datetime.now()))
+            SchedulerUtil.scheduler.add_job(func, max_instances=10, trigger=CronTrigger.from_crontab(crontab_exp),
+                                            args=args,
+                                            id=scheduler_name + str(datetime.now().strftime("%y%m%d%H%M%S%f")))
             SchedulerUtil.logger.info(
                 "add scheduler for func [" + scheduler_name + "] success. start at : " + crontab_exp)
         except Exception:

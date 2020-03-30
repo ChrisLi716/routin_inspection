@@ -1,11 +1,12 @@
 import os
 from root.common_utils.log_util import Logger
 from root.common_utils.parse_xml import ParseXml
-from root.mysql_opt.connection import Connection
+from root.mysql_opt.connection import MyConnection
 from root.common_utils.excel_util import ExcelGenerator
 from root.common_utils.email_utils import EmailUtils
 from root.common_utils.scheduler_util import SchedulerUtil
 from datetime import datetime
+from threading import Lock
 
 
 class Dispatcher:
@@ -14,38 +15,54 @@ class Dispatcher:
     __base_path = "../sources"
     __xml_file_path = __base_path + os.sep + "/sql.xml"
     __excel_extension = ".xlsx"
+    __thread_lock = Lock()
 
     @classmethod
     def __tackle_routin_inspection_for_each_config(cls, sqlbean):
-        if sqlbean:
-            file_name = sqlbean.file_name
-            biz_email_to = sqlbean.biz_email_to
-            biz_email_cc = sqlbean.biz_email_cc
-            tech_email_to = sqlbean.tech_email_to
-            tech_email_cc = sqlbean.tech_email_cc
-            sql = sqlbean.sql
-            header = Dispatcher.__build_header(sqlbean.sql)
+        try:
+            if sqlbean:
+                file_name = sqlbean.file_name
+                biz_email_to = sqlbean.biz_email_to
+                biz_email_cc = sqlbean.biz_email_cc
+                tech_email_to = sqlbean.tech_email_to
+                tech_email_cc = sqlbean.tech_email_cc
+                sql = sqlbean.sql
+                header = Dispatcher.__build_header(sqlbean.sql)
 
-            comment = sqlbean.comment
-            email_body = sqlbean.email_body
+                comment = sqlbean.comment
+                email_body = sqlbean.email_body
 
-            file_path = cls.__base_path + os.sep + file_name + datetime.now().strftime(
-                "%y%m%d%H%M%S%f") + cls.__excel_extension
-            cls.logger.info("going to generate excel file:" + file_path)
-            cursor = Connection.mycursor()
-            cursor.execute(sql)
-            result_set = cursor.fetchall()
-            cls.logger.info("sql:" + sql + ", size:" + str(len(result_set)))
-            if result_set:
-                generate_excel_succeed = ExcelGenerator.generate_excel_file(header, result_set, file_path)
-                file_tuple = (file_path,)
-                if generate_excel_succeed:
-                    if biz_email_to:
-                        EmailUtils.sent_email(biz_email_to, biz_email_cc, comment, email_body.format(len(result_set)),
-                                              file_tuple)
-                    if tech_email_to:
-                        EmailUtils.sent_email(tech_email_to, tech_email_cc, comment, email_body.format(len(result_set)),
-                                              file_tuple)
+                file_path = cls.__base_path + os.sep + file_name + "_" + datetime.now().strftime(
+                    "%y%m%d%H%M%S%f") + cls.__excel_extension
+                cls.logger.info("going to generate excel file:" + file_path)
+                my_conn = MyConnection()
+                cursor = my_conn.cursor
+                cls.logger.info("begin to query sql : " + sql)
+                cursor.execute(sql)
+                result_set = cursor.fetchall()
+                cls.logger.info("result_set_size:" + str(len(result_set)))
+                if result_set:
+                    generate_excel_succeed = ExcelGenerator.generate_excel_file(header, result_set, file_path)
+                    file_tuple = (file_path,)
+                    if generate_excel_succeed:
+                        if biz_email_to:
+                            EmailUtils.sent_email(biz_email_to, biz_email_cc, comment,
+                                                  email_body.format(len(result_set)),
+                                                  file_tuple)
+                        if tech_email_to:
+                            EmailUtils.sent_email(tech_email_to, tech_email_cc, comment,
+                                                  email_body.format(len(result_set)),
+                                                  file_tuple)
+        finally:
+            my_conn.close_conn()
+
+    @classmethod
+    def get_all_user(cls, sqlbean):
+        cls.__tackle_routin_inspection_for_each_config(sqlbean)
+
+    @classmethod
+    def get_daily_new_user(cls, sqlbean):
+        cls.__tackle_routin_inspection_for_each_config(sqlbean)
 
     @classmethod
     def __build_header(cls, sql_tmp):
@@ -57,8 +74,7 @@ class Dispatcher:
             header_list = sql_tmp[begin_index: end_index].strip().split(", ")
 
             excel_file_header = []
-            for i in header_list:
-                tmp = header_list[i]
+            for tmp in header_list:
                 if "as" in tmp:
                     as_index = tmp.index("as") + 3
                     header = tmp[as_index: len(tmp)]
@@ -85,7 +101,6 @@ class Dispatcher:
                     # rename func for scheduler job
                     # since the add_job method of apscheduler can't be same for multiple job
                     setattr(cls, func_name, cls.__tackle_routin_inspection_for_each_config)
-
                     func = getattr(cls, func_name)
                     SchedulerUtil.cron_job(func, scheduler_time, func_name, (sqlbean,))
             SchedulerUtil.scheduler.start()
