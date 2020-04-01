@@ -1,6 +1,7 @@
 import logging
 import logging.config  # config 配置
 import traceback
+from root.common_utils.file_util import create_file_if_not_exist
 
 
 class Logger(object):
@@ -59,6 +60,7 @@ class Logger(object):
     }
 
     def __init__(self):
+        create_file_if_not_exist(self.__logfile_path_staff)
         # 导入上面定义的logging配置 通过字典方式去配置这个日志
         logging.config.dictConfig(self.__log_dic)
 
