@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- This is list of customers -->
 <config_list>
-    <config name="get_all_user">
+    <config name="get_all_user" running="false">
         <biz_email>
             <to>demon.zhou@allsale.site</to>
             <cc>chris.li@allsale.site</cc>
@@ -15,7 +15,7 @@
         <sql><![CDATA[select id, username, buy_name, buy_mobile from t_dg_buy_user]]></sql>
         <scheduler>* * * * *</scheduler>
     </config>
-    <config name="get_daily_new_user">
+    <config name="get_daily_new_user" running="false">
         <biz_email>
             <to>chris.li@allsale.site</to>
             <cc>chris.li@allsale.site</cc>
@@ -41,7 +41,7 @@
         </sql>
         <scheduler>* * * * *</scheduler>
     </config>
-    <config name="get_nonsync_unshelf_products">
+    <config name="get_nonsync_unshelf_products" running="true">
         <biz_email>
             <to>chris.li@allsale.site</to>
             <cc>chris.li@allsale.site</cc>

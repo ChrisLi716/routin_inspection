@@ -98,11 +98,13 @@ class Dispatcher:
                 if sqlbean:
                     scheduler_time = sqlbean.scheduler
                     func_name = sqlbean.file_name
+                    running = sqlbean.running
+                    if running.capitalize() == str(True):
+                        # rename func for scheduler job
+                        # since the add_job method of apscheduler can't be same for multiple job
+                        setattr(cls, func_name, cls.__tackle_routin_inspection_for_each_config)
+                        func = getattr(cls, func_name)
+                        SchedulerUtil.cron_job(func, scheduler_time, func_name, (sqlbean,))
 
-                    # rename func for scheduler job
-                    # since the add_job method of apscheduler can't be same for multiple job
-                    setattr(cls, func_name, cls.__tackle_routin_inspection_for_each_config)
-                    func = getattr(cls, func_name)
-                    SchedulerUtil.cron_job(func, scheduler_time, func_name, (sqlbean,))
             SchedulerUtil.scheduler.start()
             cls.logger.info("scheduler start at :" + str(datetime.now()))

@@ -25,6 +25,10 @@ class ParseXml:
                 config_name = ele_config.xpath("./@name")
                 if config_name:
                     config_name = config_name[0]
+
+                config_running = ele_config.xpath("./@running")
+                if config_running:
+                    config_running = config_running[0]
                 biz_email = ele_config.xpath("./biz_email")
                 if biz_email:
                     biz_email_to = biz_email[0].find("./to").text
@@ -36,15 +40,15 @@ class ParseXml:
                     tech_email_cc = tech_email[0].find("./cc").text
 
                 sql = ele_config.find("./sql").text
-
                 if sql:
                     sql = re.sub("[\\s]+", " ", sql)
 
                 comment = ele_config.find("./comment").text
                 scheduler = ele_config.find("./scheduler").text
 
-                sqlbean = SqlBean(config_name, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc, sql, comment,
-                                  scheduler)
+                sqlbean = SqlBean(config_name, config_running, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc,
+                                  sql, comment, scheduler)
+
                 ParseXml.logger.info("sqlbean: " + sqlbean.__str__())
                 ParseXml.logger.info("sqlbean_list size:" + str(len(sqlbean_list)))
 
@@ -70,6 +74,11 @@ class ParseXml:
                 config_name = ele_config.xpath("./@name")
                 if config_name:
                     config_name = config_name[0]
+
+                config_running = ele_config.xpath("./@running")
+                if config_running:
+                    config_running = config_running[0]
+
                 biz_email = ele_config.xpath("./biz_email")
                 if biz_email:
                     biz_email_to = biz_email[0].find("./to").text
@@ -88,8 +97,8 @@ class ParseXml:
                     sql = re.sub("[\\s]+", " ", sql)
 
                 scheduler = ele_config.find("./scheduler").text
-                sqlbean = SqlBean(config_name, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc, sql, comment,
-                                  email_body, scheduler)
+                sqlbean = SqlBean(config_name, config_running, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc,
+                                  sql, comment, email_body, scheduler)
                 ParseXml.logger.info("sqlbean: " + sqlbean.__str__())
                 sqlbean_list.append(sqlbean)
                 ParseXml.logger.info("sqlbean_list size:" + str(len(sqlbean_list)))

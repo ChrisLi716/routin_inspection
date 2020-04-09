@@ -1,7 +1,9 @@
 class SqlBean:
-    def __init__(self, file_name, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc, sql, comment, email_body,
+    def __init__(self, file_name, running, biz_email_to, biz_email_cc, tech_email_to, tech_email_cc, sql, comment,
+                 email_body,
                  scheduler):
         self.file_name = file_name
+        self.running = running
         self.biz_email_to = biz_email_to
         self.biz_email_cc = biz_email_cc
         self.tech_email_to = tech_email_to
