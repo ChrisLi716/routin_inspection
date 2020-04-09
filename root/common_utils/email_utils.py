@@ -6,8 +6,9 @@ from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
 import traceback
 import os
-
 from root.common_utils.log_util import Logger
+
+content = "<h3>{0}</h3>"
 
 
 class EmailUtils(object):
@@ -18,7 +19,7 @@ class EmailUtils(object):
     def build_content(sender, receiver, cc, subject, body):
         # 设置邮件正文，这里是支持HTML的
         # 设置正文为符合邮件格式的HTML内容
-        m = MIMEText(_text=body, _subtype='html', _charset='utf-8')
+        m = MIMEText(_text=content.format(body), _subtype='html', _charset='utf-8')
         # 设置邮件标题
         m['Subject'] = subject
         # 设置发送人
