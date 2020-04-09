@@ -3,10 +3,18 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from root.common_utils.settings_util import SettingsUtil
 from email.mime.multipart import MIMEMultipart
+from email.utils import parseaddr, formataddr
+from email.header import Header
 import traceback
 import os
 
 from root.common_utils.log_util import Logger
+
+
+# 格式化邮件地址
+def format_addr(s):
+    name, addr = parseaddr(s)
+    return formataddr((Header(name, 'utf-8').encode(), addr))
 
 
 class EmailUtils(object):
@@ -19,14 +27,15 @@ class EmailUtils(object):
         # 设置正文为符合邮件格式的HTML内容
         m = MIMEText(_text=body, _subtype='html', _charset='utf-8')
         # 设置邮件标题
-        m['subject'] = subject
+        m['Subject'] = subject
         # 设置发送人
-        m['from'] = sender
+        # m['From'] = format_addr('Tech_NoReply {0}'.format(sender)).encode()
+        m['From'] = sender
         # 设置接收人
         if receiver:
             m['to'] = receiver
         if cc:
-            m['cc'] = cc
+            m['Cc'] = cc
 
         return m
 
@@ -41,13 +50,12 @@ class EmailUtils(object):
             file_apart = MIMEApplication(open(file, "rb").read())
             file_apart.add_header('Content-Disposition', 'attachment', filename=file_name)
             m.attach(file_apart)
-
         m['Subject'] = subject
-        m['from'] = sender
-        if receiver:
-            m['to'] = receiver
+        # m['From'] = format_addr('Tech_NoReply {0}'.format(sender)).encode()
+        m['From'] = sender
+        m['to'] = receiver
         if cc:
-            m['cc'] = cc
+            m['Cc'] = cc
 
         return m
 
@@ -80,6 +88,7 @@ class EmailUtils(object):
 
         # 设置发件邮箱，一定要自己注册的邮箱
         sender = cls.__settings.email_sender
+
         # 设置发件邮箱的授权码密码，根据163邮箱提示，登录第三方邮件客户端需要授权码
         # pwd = cls.__settings.email_pwd
 
@@ -93,12 +102,14 @@ class EmailUtils(object):
             # s = smtplib.SMTP_SSL(host, ssl_port)
             # 登陆邮箱
             # s.login(sender, pwd)
-            s.sendmail(sender, receiver, m.as_string())
-            # 发送邮件！
-            print('Done. sent email success')
+
+            # 发送邮件
+            s.sendmail(sender, receiver.split(",") + cc.split(","), m.as_string())
+            # s.send_message(m.as_string(), sender, receiver, m.as_string())
+            cls.logger.info('Done. sent email success')
             s.quit()
         except smtplib.SMTPException:
-            print('Error. sent email fail', traceback.print_exc())
+            cls.logger.info('Error. sent email fail', traceback.print_exc())
 
 
 if __name__ == '__main__':

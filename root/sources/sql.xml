@@ -3,12 +3,12 @@
 <config_list>
     <config name="get_all_user">
         <biz_email>
-            <to>chris.li@allsale.site</to>
+            <to>demon.zhou@allsale.site</to>
             <cc>chris.li@allsale.site</cc>
         </biz_email>
         <tech_email>
             <to>demon.zhou@allsale.site</to>
-            <cc>demon.zhou@allsale.site</cc>
+            <cc>chris.li@allsale.site</cc>
         </tech_email>
         <comment>查询所有注册用户信息</comment>
         <email_body>查询所有注册用户信息共{}条，见附件</email_body>
