@@ -25,7 +25,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>查询每天新注册用户信息</comment>
-        <email_body>查询到昨天注册用户信息共{}条，见附件</email_body>
+        <email_body>查询到昨天注册用户信息共{0}条，见附件</email_body>
         <sql><![CDATA[
             SELECT
               t.id, t.username, t.buy_name, t.buy_mobile
@@ -41,5 +41,43 @@
         </sql>
         <scheduler>* * * * *</scheduler>
     </config>
-
+    <config name="get_nonsync_unshelf_products">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>查询商户系统下架但未在买手后台下架的货源商品</comment>
+        <email_body>到目前为至，运营在比柚商户系统有{0}个货源商品已下架但未在买手后台下架，见附件</email_body>
+        <sql><![CDATA[
+            SELECT
+                t.gid AS '商品ID',
+                t.NAME AS '商品名',
+                t.brand_name AS '品牌名',
+                u.currency_type '货币单位',
+                u.wholesale_price AS '批发价',
+                d.pname AS '供应商名称',
+                t.create_date AS '同步买手后台时间',
+                t.update_date AS '买手后台最后更新时间'
+            FROM
+                t_dg_source_goods t,
+                t_ms_product p,
+                t_dg_source_goods_sku u,
+                t_dg_source_provider d
+            WHERE
+                t.shelf = 0
+                AND t.record_status = 'A'
+                AND t.update_date <= DATE_FORMAT( NOW(), '%Y-%m-%d %H:%k:%s' )
+                AND u.goods_id = t.gid
+                AND p.id = t.relevance_id
+                AND d.pid = t.provider_id
+                AND p.`status` = 3
+            ORDER BY
+                t.update_date DESC;]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
 </config_list>

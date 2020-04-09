@@ -32,8 +32,8 @@ class Dispatcher:
                 comment = sqlbean.comment
                 email_body = sqlbean.email_body
 
-                file_path = cls.__base_path + os.sep + file_name + "_" + datetime.now().strftime(
-                    "%y%m%d%H%M%S%f") + cls.__excel_extension
+                file_path = cls.__base_path + os.sep + "excel" + os.sep + file_name + "_" + datetime.now().strftime(
+                    "%Y%m%d%H%M%S%f") + cls.__excel_extension
                 cls.logger.info("going to generate excel file:" + file_path)
                 my_conn = MyConnection()
                 cursor = my_conn.cursor
@@ -56,13 +56,13 @@ class Dispatcher:
         finally:
             my_conn.close_conn()
 
-    @classmethod
-    def get_all_user(cls, sqlbean):
-        cls.__tackle_routin_inspection_for_each_config(sqlbean)
-
-    @classmethod
-    def get_daily_new_user(cls, sqlbean):
-        cls.__tackle_routin_inspection_for_each_config(sqlbean)
+    # @classmethod
+    # def get_all_user(cls, sqlbean):
+    #     cls.__tackle_routin_inspection_for_each_config(sqlbean)
+    #
+    # @classmethod
+    # def get_daily_new_user(cls, sqlbean):
+    #     cls.__tackle_routin_inspection_for_each_config(sqlbean)
 
     @classmethod
     def __build_header(cls, sql_tmp):

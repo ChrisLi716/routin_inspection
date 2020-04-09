@@ -65,8 +65,8 @@ class EmailUtils(object):
         m.attach(text_apart)
         m.attach(file_apart)
         m['subject'] = 'title'
-        m['from'] = 'lilunlogic@163.com'
-        m['to'] = '872343840@qq.com'
+        m['from'] = 'XXX@163.com'
+        m['to'] = 'XXX@qq.com'
 
         return m
 
@@ -81,17 +81,18 @@ class EmailUtils(object):
         # 设置发件邮箱，一定要自己注册的邮箱
         sender = cls.__settings.email_sender
         # 设置发件邮箱的授权码密码，根据163邮箱提示，登录第三方邮件客户端需要授权码
-        pwd = cls.__settings.email_pwd
+        # pwd = cls.__settings.email_pwd
 
         m = EmailUtils.build_content(sender, receiver, cc, subject, body)
         m = EmailUtils.build_attach_file(m, sender, receiver, cc, subject, file_tuple)
         # m = test_attach_email()
+        cls.logger.info("host:" + host + ", sender:" + sender + ", ssl_port:" + non_ssl_port)
         try:
             s = smtplib.SMTP(host, non_ssl_port)
             # 注意！如果是使用SSL端口，这里就要改为SMTP_SSL
             # s = smtplib.SMTP_SSL(host, ssl_port)
             # 登陆邮箱
-            s.login(sender, pwd)
+            # s.login(sender, pwd)
             s.sendmail(sender, receiver, m.as_string())
             # 发送邮件！
             print('Done. sent email success')

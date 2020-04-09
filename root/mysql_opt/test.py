@@ -1,8 +1,4 @@
-import sys
-from root.common_utils.const import Const
+from datetime import datetime
 
-const = Const()
-const.MYSQL_SECTION = "mysql"
-const.EMAIL_SECTION = "email"
-
-print(sys.modules[__name__])
+date_str = datetime.now().strftime("%Y%m%d%H%M%S%f")
+print(date_str)
