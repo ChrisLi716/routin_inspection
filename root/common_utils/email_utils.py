@@ -3,18 +3,11 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from root.common_utils.settings_util import SettingsUtil
 from email.mime.multipart import MIMEMultipart
-from email.utils import parseaddr, formataddr
-from email.header import Header
+from email.utils import formataddr
 import traceback
 import os
 
 from root.common_utils.log_util import Logger
-
-
-# 格式化邮件地址
-def format_addr(s):
-    name, addr = parseaddr(s)
-    return formataddr((Header(name, 'utf-8').encode(), addr))
 
 
 class EmailUtils(object):
@@ -29,8 +22,8 @@ class EmailUtils(object):
         # 设置邮件标题
         m['Subject'] = subject
         # 设置发送人
-        # m['From'] = format_addr('Tech_NoReply {0}'.format(sender)).encode()
-        m['From'] = sender
+        m['From'] = formataddr(('Tech_Center', sender))
+        # m['From'] = sender
         # 设置接收人
         if receiver:
             m['to'] = receiver
@@ -51,8 +44,7 @@ class EmailUtils(object):
             file_apart.add_header('Content-Disposition', 'attachment', filename=file_name)
             m.attach(file_apart)
         m['Subject'] = subject
-        # m['From'] = format_addr('Tech_NoReply {0}'.format(sender)).encode()
-        m['From'] = sender
+        m['From'] = formataddr(('Tech_Center', sender))
         m['to'] = receiver
         if cc:
             m['Cc'] = cc

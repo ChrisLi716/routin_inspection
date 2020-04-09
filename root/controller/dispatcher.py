@@ -32,8 +32,9 @@ class Dispatcher:
                 comment = sqlbean.comment
                 email_body = sqlbean.email_body
 
-                file_path = cls.__base_path + os.sep + "excel" + os.sep + file_name + "_" + datetime.now().strftime(
-                    "%Y%m%d%H%M%S%f") + cls.__excel_extension
+                excel_file_dir = cls.__base_path + os.sep + "excel"
+                excel_file_name = file_name + "_" + datetime.now().strftime("%Y%m%d%H%M%S%f") + cls.__excel_extension
+                file_path = excel_file_dir + os.sep + excel_file_name
                 cls.logger.info("going to generate excel file:" + file_path)
                 my_conn = MyConnection()
                 cursor = my_conn.cursor

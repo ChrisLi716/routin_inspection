@@ -21,7 +21,7 @@ class SettingsUtil:
 
         self.email_host = config.get(self.__const.EMAIL_SECTION, "host")
         self.email_sender = config.get(self.__const.EMAIL_SECTION, "sender")
-        self.email_pwd = config.get(self.__const.EMAIL_SECTION, "pwd")
+        # self.email_pwd = config.get(self.__const.EMAIL_SECTION, "pwd")
         self.email_non_ssl_port = config.get(self.__const.EMAIL_SECTION, "non_ssl_port")
         self.email_ssl_port = config.get(self.__const.EMAIL_SECTION, "ssl_port")
 

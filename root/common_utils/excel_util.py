@@ -1,7 +1,7 @@
 from openpyxl import Workbook
 from root.common_utils.log_util import Logger
 import traceback
-from mysql import connector
+from root.common_utils.file_util import create_file_if_not_exist
 
 
 # wb = Workbook()
@@ -45,6 +45,7 @@ class ExcelGenerator(object):
     @staticmethod
     def generate_excel_file(header, rows, file_path):
         try:
+            create_file_if_not_exist(file_path)
             wb = Workbook()
             sheet = wb.create_sheet("Mysheet", 0)
             sheet.append(header)
