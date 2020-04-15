@@ -50,7 +50,7 @@ class ParseXml:
                                   sql, comment, scheduler)
 
                 ParseXml.logger.info("sqlbean: " + sqlbean.__str__())
-                ParseXml.logger.info("sqlbean_list size:" + str(len(sqlbean_list)))
+            ParseXml.logger.info("sqlbean_list size:" + str(len(sqlbean_list)))
 
             return sqlbean
 

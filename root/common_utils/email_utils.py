@@ -72,7 +72,7 @@ class EmailUtils(object):
         return m
 
     @classmethod
-    def sent_email(cls, receiver, cc, subject, body, file_tuple):
+    def sent_email(cls, receiver, cc, subject, body, *file_tuple):
         # 设置发件服务器地址
         host = cls.__settings.email_host
         # 设置发件服务器端口号。注意，这里有SSL和非SSL两种形式，现在一般是SSL方式
@@ -86,7 +86,8 @@ class EmailUtils(object):
         # pwd = cls.__settings.email_pwd
 
         m = EmailUtils.build_content(sender, receiver, cc, subject, body)
-        m = EmailUtils.build_attach_file(m, sender, receiver, cc, subject, file_tuple)
+        if file_tuple:
+            m = EmailUtils.build_attach_file(m, sender, receiver, cc, subject, file_tuple)
         # m = test_attach_email()
         cls.logger.info("host:" + host + ", sender:" + sender + ", ssl_port:" + non_ssl_port)
         try:
