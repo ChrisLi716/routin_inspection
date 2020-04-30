@@ -50,33 +50,721 @@
             <to>demon.zhou@allsale.site</to>
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
-        <comment>查询商户系统下架但未在买手后台下架的货源商品</comment>
-        <email_body>到目前为至，运营在比柚商户系统有&lt;font color="red"&gt;{0}&lt;/font&gt;个货源商品已下架但未在买手后台下架，见附件</email_body>
+        <comment>商户下架但在买手上架的货源商品</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户下架但在买手上架的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
         <sql><![CDATA[
             SELECT
-                t.gid AS '商品ID',
-                t.NAME AS '商品名',
-                t.brand_name AS '品牌名',
-                u.currency_type '货币单位',
-                u.wholesale_price AS '批发价',
-                d.pname AS '供应商名称',
-                t.create_date AS '同步买手后台时间',
-                t.update_date AS '买手后台最后更新时间'
+             tmm.shop as '商户供应商名称',
+             tmm.shopkeeper as '掌柜名称',
+             tmp.`name` as '商户商品名称',
+             SUM(tmps.wholesale_price) as '商户批发价',
+             toc.symbol as '商户本位币符号',
+            CASE
+             WHEN tmp.`status` = 3 THEN
+             "待上架"
+             WHEN tmp.`status` = 1 THEN
+             "新增"
+             WHEN tmp.`status` = 2 THEN
+             "待审核"
+             END as '商户商品状态',
+             tmp.create_date as '首次同步时间',
+             tmp.update_date as '商户最新更新时间',
+             tdsg.`name` as '买手商品名称' ,
+             tdsg.update_date as '买手最新更新时间'
             FROM
-                t_dg_source_goods t,
-                t_ms_product p,
-                t_dg_source_goods_sku u,
-                t_dg_source_provider d
+             t_ms_product tmp,
+             t_ms_merchant tmm,
+             t_ops_currency toc,
+             t_ms_product_sku tmps,
+             t_dg_source_goods_sku tdsgs,
+             t_dg_source_goods tdsg
             WHERE
-                t.shelf = 0
-                AND t.record_status = 'A'
-                AND t.update_date <= DATE_FORMAT( NOW(), '%Y-%m-%d %H:%k:%s' )
-                AND u.goods_id = t.gid
-                AND p.id = t.relevance_id
-                AND d.pid = t.provider_id
-                AND p.`status` = 3
+             tmp.tenant_id = tmm.tenant_id
+             AND tmm.currency_type = toc.type
+             AND tmp.id = tmps.product_id
+             AND tmps.id = tdsgs.sku_id
+             AND tdsgs.goods_id = tdsg.gid
+             AND tmp.`status` = '3'
+             AND tmp.del_flag = '1'
+             AND tdsg.shelf = '0'
+             AND tdsg.record_status = 'A'
+            GROUP BY
+             tmps.id
             ORDER BY
-                t.update_date DESC;]]>
+            tmp.create_date DESC, tdsg.update_date desc;]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_source_nonauto_refund_orders" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>超过48小时未成功拒单的货源订单[包括自动采购]</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，超过48小时未成功拒单的货源订单&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+            sp.shop as '商户供应商名称',
+             CASE
+            WHEN oi.goods_source_type = 3 THEN
+             mp.`name`
+            WHEN oi.goods_source_type = 6 THEN
+             mpt.`name`
+            END as '商户商品名称',
+             oi.goods_name as '买手商品名称',
+             oi.goods_count as '数量',
+             o.order_code as '订单号',
+             o.order_price as '订单价格',
+             CASE
+            WHEN o.pay_type = 1 THEN
+             '支付宝'
+            WHEN o.pay_type = 2 THEN
+             '微信'
+            WHEN o.pay_type = 3 THEN
+             '余额'
+            WHEN o.pay_type = 4 THEN
+             '微信H5'
+            WHEN o.pay_type = 5 THEN
+             '微信小程序'
+            END as '支付方式',
+             o.order_status as '待接单',
+             bu.buy_name as '代购店铺名',
+             bu.buy_mobile as '代购电话',
+             o.pay_date as '下单时间',
+             o.receiving_name as '收货人姓名',
+             o.receiving_phone as '收货人手机号',
+             o.receiving_address as '收货人地址'
+            FROM
+             t_dg_order o
+            LEFT JOIN t_dg_order_item oi ON oi.order_id = o.id
+            LEFT JOIN t_dg_source_goods_sku sgs ON sgs.sid=oi.goods_id
+            LEFT JOIN t_ms_product_sku mps ON mps.id=sgs.sku_id
+            LEFT JOIN t_ms_product mp ON mp.id=mps.product_id
+            LEFT JOIN t_dg_source_goods_record sgr ON sgr.rid=oi.goods_id
+            LEFT JOIN t_ms_product_sku mpst ON mpst.id=sgr.rid
+            LEFT JOIN t_ms_product mpt ON mpt.id=mpst.product_id
+            LEFT JOIN t_dg_buy_user bu ON bu.id = o.user_id
+            LEFT JOIN t_dg_source_provider sp ON sp.user_id=bu.id
+            LEFT JOIN t_dg_buy_user cu ON cu.id = o.customer_id
+            WHERE
+             o.record_status = 'A'
+            AND o.id IN (
+             SELECT
+              dt.order_id orderId
+             FROM
+              t_dg_task dt
+             LEFT JOIN t_dg_order o ON o.id = dt.order_id
+             WHERE
+              dt.type = 2
+             AND dt.second_order_id IS NOT NULL
+             AND now() > dt.create_date + INTERVAL 2 DAY
+             AND o.record_status = 'A'
+             AND o.order_status = 6)
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_nonauto_refund_orders" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>超过48小时未成功拒单的非货源订单</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，超过48小时未成功拒单的非货源订单&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+             oi.goods_name as '买手商品名称',
+             oi.goods_count as '数量',
+             o.order_code as '订单号',
+             o.order_price as'订单价格',
+             CASE
+            WHEN o.pay_type = 1 THEN
+             '支付宝'
+            WHEN o.pay_type = 2 THEN
+             '微信'
+            WHEN o.pay_type = 3 THEN
+             '余额'
+            WHEN o.pay_type = 4 THEN
+             '微信H5'
+            WHEN o.pay_type = 5 THEN
+             '微信小程序'
+            END as '支付方式',
+             o.order_status as '待接单',
+             bu.buy_name as '代购店铺名',
+             bu.buy_mobile as '代购电话',
+             o.pay_date as '下单时间',
+             o.receiving_name as '收货人姓名',
+             o.receiving_phone as '收货人手机号',
+             o.receiving_address as '收货人地址'
+            FROM
+             t_dg_order o
+            LEFT JOIN t_dg_order_item oi ON oi.order_id = o.id
+            LEFT JOIN t_dg_buy_user bu ON bu.id = o.user_id
+            LEFT JOIN t_dg_buy_user cu ON cu.id = o.customer_id
+            WHERE
+             o.record_status = 'A'
+            AND o.id IN (
+             SELECT
+              dt.order_id orderId
+             FROM
+              t_dg_task dt
+             LEFT JOIN t_dg_order o ON o.id = dt.order_id
+             WHERE
+              dt.type = 2
+             AND dt.second_order_id IS NULL
+             AND now() > dt.create_date + INTERVAL 2 DAY
+             AND o.record_status = 'A'
+             AND o.order_status = 6)
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_dupliated_sku_value_orders" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>规格值重复但已同步买手后台的上架的货源商品</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，规格值重复但已同步买手后台上架的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+                inn.beeyoshop AS '比柚商户名称',
+                inn.provider AS '供应商名称',
+                inn.beeyo_productname AS '比柚商品名称',
+                inn.dg_productname AS '买手商品名称',
+                inn.wholesale_price AS '同步批发价',
+                inn.create_date AS '首次同步时间',
+                inn.lv1_price AS '等级 1价格',
+                inn.lv2_price AS '等级 2价格',
+                inn.lv3_price AS '等级 3价格',
+                inn.lv4_price AS '等级 4价格',
+                inn.lv5_price AS '等级 5价格',
+                inn.currency_type AS '本位币种',
+                psp.property_value AS '买手规格值'
+            FROM
+                (
+            SELECT
+                mm.shop beeyoshop,
+                sp.shop provider,
+                mp.`name` beeyo_productname,
+                sg.`name` dg_productname,
+                sgs.wholesale_price,
+                sgs.create_date,
+                sgs.lv1_price,
+                sgs.lv2_price,
+                sgs.lv3_price,
+                sgs.lv4_price,
+                sgs.lv5_price,
+                sg.gid,
+                ps.id psid,
+                sp.currency_type
+            FROM
+                t_dg_source_goods sg
+                LEFT JOIN t_ms_product mp ON mp.id = sg.relevance_id
+                INNER JOIN t_dg_source_provider sp ON sg.provider_id = sp.pid
+                AND sp.record_status = 'A'
+                LEFT JOIN t_ms_merchant mm ON mm.tenant_id = sp.relevance_id
+                INNER JOIN t_dg_source_goods_sku sgs ON sg.gid = sgs.goods_id
+                AND sgs.record_status = 'A'
+                LEFT JOIN t_ms_product_sku ps ON sgs.sku_id = ps.id
+            WHERE
+                sg.record_status = 'A'
+                AND sg.shelf = 0
+                AND mp.del_flag = 1
+                AND mp.STATUS = 4
+                AND ps.del_flag = 1
+                AND mm.STATUS = 2
+            GROUP BY
+                ps.id
+            HAVING
+                COUNT( * ) > 1
+                ) inn
+                LEFT JOIN t_ms_product_sku_property psp ON psp.product_sku_id = inn.psid
+            WHERE
+                psp.property_value IS NOT NULL]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_not_ideantical_sku_number_orders" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>商户商品规格值个数和买手后台对应商品规格值个数不相等但已同步买手后台已上货的货源商品</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户商品规格值个数和买手后台对应商品规格值个数不相等,
+            但已同步买手后台已上货的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+            mm.shop as '比柚商户名称',
+            sp.shop as '供应商名称',
+            mp.`name` as '比柚商品名称',
+            sg.`name` as '买手商品名称',
+            sgs.wholesale_price as '同步批发价',
+            sgs.create_date as '首次同步时间',
+            sgs.lv1_price as '等级1价格',
+            sgs.lv2_price as '等级2价格',
+            sgs.lv3_price as '等级3价格',
+            sgs.lv4_price as '等级4价格',
+            sgs.lv5_price as '等级5价格',
+            psp.property_value as '买手规格值',
+            sp.currency_type as '本位币种'
+            FROM
+            t_dg_source_goods sg
+            LEFT JOIN t_ms_product mp ON mp.id = sg.relevance_id
+            INNER JOIN t_dg_source_provider sp ON sg.provider_id = sp.pid AND sp.record_status = 'A'
+            LEFT JOIN t_ms_merchant mm ON mm.tenant_id = sp.relevance_id
+            INNER JOIN t_dg_source_goods_sku sgs ON sg.gid = sgs.goods_id AND sgs.record_status = 'A'
+            LEFT JOIN t_ms_product_sku ps ON sgs.sku_id = ps.id
+            LEFT JOIN t_ms_product_sku_property psp ON psp.product_sku_id = ps.id
+            WHERE
+            sg.record_status = 'A'
+            AND sg.shelf = 0
+            AND NOT EXISTS (
+               SELECT
+               sgs1.sid
+               FROM
+               t_dg_source_goods sg
+               LEFT JOIN t_ms_product mp ON mp.id = sg.relevance_id
+               INNER JOIN t_dg_source_provider sp ON sg.provider_id = sp.pid AND sp.record_status = 'A'
+               LEFT JOIN t_ms_merchant mm ON mm.tenant_id = sp.relevance_id
+               INNER JOIN t_dg_source_goods_sku sgs1 ON sg.gid = sgs1.goods_id AND sgs1.record_status = 'A'
+               LEFT JOIN t_ms_product_sku ps ON sgs1.sku_id = ps.id
+               WHERE
+               sg.record_status = 'A'
+               AND sg.shelf = 0
+               AND mp.del_flag = 1
+               AND mp.status = 4
+               AND ps.del_flag = 1
+               AND mm.status = 2
+               AND ps.wholesale_price > 0
+               AND sgs1.sid = sgs.sid
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_shop_closed_but_orders_not_completed_in_beeyo" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>供应商店铺已下架但仍有状态未流转到已完成的订单</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户商品规格值个数和买手后台对应商品规格值个数不相等,
+            但已同步买手后台已上货的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+             tmm.shop AS '彼柚店铺名称',
+             tmm.shopkeeper AS '彼柚掌柜名称',
+             tmm.`status` AS '彼柚店铺状态',
+             tmp.`name` AS '商品名称',
+             SUM( tmoi.quantity ) AS '订单含商品数量',
+             tmc.`name` AS '分类名称',
+             tmo.sn AS '订单编号',
+             tmo.total_amount AS '订单金额',
+             tmo.pay_type AS '支付方式',
+             tmo.`status` AS '订单状态',
+             tdsp.shop AS '代购店铺名',
+             tdm.phone AS '代购电话',
+             tdo.create_date AS '下单时间',
+             tdo.receiving_name AS '收货人',
+             tdo.receiving_phone AS '收货人手机号',
+             tdo.receiving_address AS '收货人地址'
+            FROM
+             t_ms_order tmo
+             INNER JOIN t_ms_order_item tmoi ON tmo.id = tmoi.order_id
+             INNER JOIN t_ms_product tmp ON tmoi.product_id = tmp.id
+             INNER JOIN t_ms_category tmc ON tmp.category_id = tmc.id
+             LEFT JOIN t_ms_merchant tmm ON tmp.tenant_id = tmm.tenant_id
+             INNER JOIN t_dg_order_chain tdgc ON tmo.id = tdgc.by_order_id
+             INNER JOIN t_dg_order tdo ON tdgc.cid = tdo.order_chain_id
+             LEFT JOIN t_dg_admin tdm ON tdo.user_id = tdm.id
+             LEFT JOIN t_dg_source_provider tdsp ON tdm.id = tdsp.user_id
+            WHERE
+             tmo.source = '1'
+             AND tmo.del_flag = '1'
+             AND tmm.`status` = '3'
+             AND tdo.order_status IN ( 1, 2 )
+            GROUP BY
+             tmoi.order_id
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_manual_insert_not_sync_2_buyer_products" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>手动插入商户系统但未同步买手后台的已上架货源商品</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，手动插入商户系统但未同步买手后台的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+             tmm.shop as '彼柚店铺名称',
+             tmm.shopkeeper as '店铺掌柜名称',
+             tmp.`name` as '商品名称',
+             tmps.wholesale_price as '彼柚批发价',
+             toc.symbol as '本位币符号'
+            FROM
+             t_ms_product tmp
+             INNER JOIN t_ms_product_sku tmps ON tmp.id = tmps.product_id
+             INNER JOIN t_ms_merchant tmm ON tmp.tenant_id = tmm.tenant_id
+             INNER JOIN t_ops_currency toc ON tmm.currency_type = toc.type
+             LEFT JOIN t_dg_source_goods tdsg ON tmp.id = tdsg.relevance_id AND tdsg.provider_id IS NULL
+             LEFT JOIN t_dg_source_provider tdsp ON tdsg.provider_id = tdsp.pid
+            WHERE
+             tmp.`status` = 4 AND tmp.del_flag = '1' AND tdsg.shelf != 0
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_wholesale_prince_not_equal_products" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>商户系统不同规格的批发价与买手各规格批发价不相等的已上架货源商品</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户系统不同规格的批发价与买手各规格批发价不相等的已上架货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+             tmm.shop AS '商户供应商名称',
+             tmp.`name` AS '商户商品名称',
+             tms.wholesale_price AS '商户批发价[本位币]',
+             tmm.currency_type AS '商户[本位币]',
+             tdg.create_date AS '首次同步买手时间',
+             tdg.update_date AS '最新同步买手时间',
+             tdp.shop AS '买手供应商名称',
+             tdg.`name` AS '买手商品名称',
+             if(tdg.shelf=0, "已上架" ,"") AS '商品状态',
+             tds.wholesale_price AS '买手批发价[本位币种]',
+             ( SELECT REPLACE ( GROUP_CONCAT( property_value ), ',', '/' ) propertyValue FROM t_ms_product_sku_property WHERE product_sku_id = tms.id ) AS '规格值',
+             tds.lv1_price AS '买手规格值对应的等级1价',
+             tds.lv2_price AS '买手规格值对应的等级2价',
+             tds.lv3_price AS '买手规格值对应的等级3价',
+             tds.lv4_price AS '买手规格值对应的等级4价',
+             tds.lv5_price AS '买手规格值对应的等级5价'
+            FROM
+             t_dg_source_goods tdg
+             INNER JOIN t_dg_source_goods_sku tds ON tds.goods_id = tdg.gid
+             INNER JOIN t_dg_source_provider tdp ON tdp.pid = tdg.provider_id
+             INNER JOIN t_ms_product_sku tms ON tds.sku_id = tms.id
+             INNER JOIN t_ms_product tmp ON tms.product_id = tmp.id
+             INNER JOIN t_ms_merchant tmm ON tmm.tenant_id = tmp.tenant_id
+            WHERE
+             tds.wholesale_price <> tms.wholesale_price
+             AND tdg.record_status = 'A'
+             AND tdg.shelf = 0
+            ORDER BY
+             tdg.create_date DESC,
+             tdg.update_date DESC
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_dg_shop_products_lack_of_main_picuture" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>买手代购店铺商品主图为空的商品</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，买手代购店铺商品主图为空的商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+            SELECT
+            bu.buy_name '代购店铺名称',
+            bu.buy_mobile '代购手机号码',
+            g.goods_name '代购商品名称',
+            g.companion_price '同行价',
+            g.customer_price '客户价',
+              g.create_date '上新时间'
+            FROM
+             t_dg_goods g
+            left join t_dg_buy_user bu ON bu.id=g.user_id
+            WHERE
+             g.goods_url IS NULL
+            AND g.user_id > 569
+            AND g.record_status = 'A'
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_one_beeyo_skuId_but_more_than_one_sku_of_different_buyer_products" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>相同比柚skuid对应买手不同的货源下的sku</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，相同比柚skuid对应买手不同的货源下的sku &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+           SELECT
+                inn.gid AS '买手货源id',
+                inn.sid AS '买手货源skuid',
+                inn.psid AS '比柚skuid',
+                inn.beeyoshop AS '比柚商户名称',
+                inn.provider AS '供应商名称',
+                inn.beeyo_productname AS '比柚商品名称',
+                inn.dg_productname AS '买手商品名称',
+                inn.wholesale_price AS '同步批发价',
+                inn.create_date AS '首次同步时间',
+                inn.lv1_price AS '等级 1价格',
+                inn.lv2_price AS '等级 2价格',
+                inn.lv3_price AS '等级 3价格',
+                inn.lv4_price AS '等级 4价格',
+                inn.lv5_price AS '等级 5价格',
+                inn.currency_type AS '本位币种',
+                psp.property_value AS '买手规格值'
+            FROM
+                (
+            SELECT
+                innn.*,
+                sg.gid,
+                sgs.sid,
+                sp.shop provider,
+                sg.`name` dg_productname,
+                sgs.wholesale_price,
+                sgs.create_date,
+                sgs.lv1_price,
+                sgs.lv2_price,
+                sgs.lv3_price,
+                sgs.lv4_price,
+                sgs.lv5_price
+            FROM
+                t_dg_source_goods sg
+                INNER JOIN t_dg_source_provider sp ON sg.provider_id = sp.pid
+                AND sp.record_status = 'A'
+                INNER JOIN t_dg_source_goods_sku sgs ON sg.gid = sgs.goods_id
+                AND sgs.record_status = 'A'
+                INNER JOIN (
+            SELECT
+                ps.id psid,
+                mm.shop beeyoshop,
+                mp.`name` beeyo_productname,
+                sp.currency_type
+            FROM
+                t_dg_source_goods sg
+                INNER JOIN t_dg_source_provider sp ON sg.provider_id = sp.pid
+                AND sp.record_status = 'A'
+                INNER JOIN t_dg_source_goods_sku sgs ON sg.gid = sgs.goods_id
+                AND sgs.record_status = 'A'
+                LEFT JOIN t_ms_product mp ON mp.id = sg.relevance_id
+                LEFT JOIN t_ms_merchant mm ON mm.tenant_id = sp.relevance_id
+                LEFT JOIN t_ms_product_sku ps ON sgs.sku_id = ps.id
+            WHERE
+                sg.record_status = 'A'
+                AND sg.shelf = 0
+                AND mp.del_flag = 1
+                AND mp.STATUS = 4
+                AND ps.del_flag = 1
+                AND mm.STATUS = 2
+            GROUP BY
+                ps.id
+            HAVING
+                COUNT( * ) > 1
+                ) innn ON innn.psid = sgs.sku_id
+            GROUP BY
+                sg.gid
+            HAVING
+                COUNT( * ) > 1
+                ) inn
+                LEFT JOIN t_ms_product_sku_property psp ON psp.product_sku_id = inn.psid
+            WHERE
+                psp.property_value IS NOT NULL
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+     <config name="get_one_beeyo_skuId_but_more_than_one_sku_of_same_buyer_products" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>相同比柚skuid对应买手相同的货源下的不同sku </comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，相同比柚skuid对应买手相同的货源下的不同sku &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+          SELECT
+            inn.gid AS '买手货源id',
+            inn.sid AS '买手货源skuid',
+            inn.psid AS '比柚skuid',
+            inn.beeyoshop AS '比柚商户名称',
+            inn.provider AS '供应商名称',
+            inn.beeyo_productname AS '比柚商品名称',
+            inn.dg_productname AS '买手商品名称',
+            inn.wholesale_price AS '同步批发价',
+            inn.create_date AS '首次同步时间',
+            inn.lv1_price AS '等级 1价格',
+            inn.lv2_price AS '等级 2价格',
+            inn.lv3_price AS '等级 3价格',
+            inn.lv4_price AS '等级 4价格',
+            inn.lv5_price AS '等级 5价格',
+            inn.currency_type AS '本位币种',
+            psp.property_value AS '买手规格值'
+          FROM
+            (
+            SELECT
+            innn.*,
+            sg.gid,
+            sgs.sid,
+            sp.shop provider,
+            sg.`name` dg_productname,
+            sgs.wholesale_price,
+            sgs.create_date,
+            sgs.lv1_price,
+            sgs.lv2_price,
+            sgs.lv3_price,
+            sgs.lv4_price,
+            sgs.lv5_price
+        FROM
+            t_dg_source_goods sg
+            INNER JOIN t_dg_source_provider sp ON sg.provider_id = sp.pid
+            AND sp.record_status = 'A'
+            INNER JOIN t_dg_source_goods_sku sgs ON sg.gid = sgs.goods_id
+            AND sgs.record_status = 'A'
+            INNER JOIN (
+        SELECT
+            ps.id psid,
+            mm.shop beeyoshop,
+            mp.`name` beeyo_productname,
+            sp.currency_type
+        FROM
+            t_dg_source_goods sg
+            INNER JOIN t_dg_source_provider sp ON sg.provider_id = sp.pid
+            AND sp.record_status = 'A'
+            INNER JOIN t_dg_source_goods_sku sgs ON sg.gid = sgs.goods_id
+            AND sgs.record_status = 'A'
+            LEFT JOIN t_ms_product mp ON mp.id = sg.relevance_id
+            LEFT JOIN t_ms_merchant mm ON mm.tenant_id = sp.relevance_id
+            LEFT JOIN t_ms_product_sku ps ON sgs.sku_id = ps.id
+        WHERE
+            sg.record_status = 'A'
+            AND sg.shelf = 0
+            AND mp.del_flag = 1
+            AND mp.STATUS = 4
+            AND ps.del_flag = 1
+            AND mm.STATUS = 2
+        GROUP BY
+            ps.id
+        HAVING
+            COUNT( * ) > 1
+            ) innn ON innn.psid = sgs.sku_id
+        GROUP BY
+            sg.gid
+        HAVING
+            COUNT( * ) > 1
+            ) inn
+            LEFT JOIN t_ms_product_sku_property psp ON psp.product_sku_id = inn.psid
+        WHERE
+            psp.property_value IS NOT NULL
+            ]]>
+        </sql>
+        <scheduler>* * * * *</scheduler>
+    </config>
+    <config name="get_one_beeyo_product_but_more_than_one_buyer_products" running="true">
+        <biz_email>
+            <to>chris.li@allsale.site</to>
+            <cc>chris.li@allsale.site</cc>
+        </biz_email>
+        <tech_email>
+            <to>demon.zhou@allsale.site</to>
+            <cc>demon.zhou@allsale.site</cc>
+        </tech_email>
+        <comment>买手端多个商品关联同一货源商品</comment>
+        <email_body>
+            Dear All
+            <p/>
+            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，买手端多个商品关联同一货源商品 &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
+        </email_body>
+        <sql><![CDATA[
+           SELECT
+             *
+           FROM
+             t_dg_source_goods
+           WHERE
+             record_status = 'A'
+             AND relevance_id IN ( SELECT relevance_id FROM t_dg_source_goods WHERE record_status = 'A' AND shelf = 0 GROUP BY relevance_id HAVING COUNT( relevance_id ) > 1 )
+           ORDER BY
+             relevance_id DESC
+            ]]>
         </sql>
         <scheduler>* * * * *</scheduler>
     </config>
