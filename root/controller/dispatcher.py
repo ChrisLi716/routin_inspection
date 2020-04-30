@@ -7,6 +7,7 @@ from root.common_utils.email_utils import EmailUtils
 from root.common_utils.scheduler_util import SchedulerUtil
 from datetime import datetime
 from threading import Lock
+import re
 
 
 class Dispatcher:
@@ -27,13 +28,18 @@ class Dispatcher:
                 tech_email_to = sqlbean.tech_email_to
                 tech_email_cc = sqlbean.tech_email_cc
                 sql = sqlbean.sql
-                header = Dispatcher.__build_header(sqlbean.sql)
+                header = Dispatcher.build_header(sqlbean.sql)
 
                 comment = sqlbean.comment
                 email_body = sqlbean.email_body
 
                 excel_file_dir = cls.__base_path + os.sep + "excel"
-                excel_file_name = file_name + "_" + datetime.now().strftime("%Y%m%d%H%M%S%f") + cls.__excel_extension
+
+                now = datetime.now()
+                time2file = now.strftime("%Y%m%d%H%M%S%f")
+                time2email = now.strftime("%Y-%m-%d %H:%M:%S.%f")
+
+                excel_file_name = file_name + "_" + time2file + cls.__excel_extension
                 file_path = excel_file_dir + os.sep + excel_file_name
                 cls.logger.info("going to generate excel file:" + file_path)
                 my_conn = MyConnection()
@@ -48,44 +54,40 @@ class Dispatcher:
                     if generate_excel_succeed:
                         if biz_email_to:
                             EmailUtils.sent_email(biz_email_to, biz_email_cc, comment,
-                                                  email_body.format(len(result_set)),
+                                                  email_body.format(time=time2email, count=len(result_set)),
                                                   file_tuple)
                         if tech_email_to:
                             EmailUtils.sent_email(tech_email_to, tech_email_cc, comment,
-                                                  email_body.format(len(result_set)),
-                                                  file_tuple)
+                                                  email_body.format(time=time2email, count=len(result_set)), file_tuple)
+                else:
+                    if tech_email_to:
+                        EmailUtils.sent_email(tech_email_to, tech_email_cc, comment,
+                                              email_body.format(time=time2email, count=len(result_set)))
         finally:
             my_conn.close_conn()
 
-    # @classmethod
-    # def get_all_user(cls, sqlbean):
-    #     cls.__tackle_routin_inspection_for_each_config(sqlbean)
-    #
-    # @classmethod
-    # def get_daily_new_user(cls, sqlbean):
-    #     cls.__tackle_routin_inspection_for_each_config(sqlbean)
-
     @classmethod
-    def __build_header(cls, sql_tmp):
+    def build_header(cls, sql_tmp):
         # get the header for excel file
         if sql_tmp:
             sql_tmp = str(sql_tmp).lower()
             begin_index = sql_tmp.index("select") + 7
             end_index = sql_tmp.index("from") - 1
-            header_list = sql_tmp[begin_index: end_index].strip().split(", ")
+            header_list = sql_tmp[begin_index:end_index].strip().split(", ")
 
             excel_file_header = []
             for tmp in header_list:
                 if "as" in tmp:
-                    as_index = tmp.index("as") + 3
-                    header = tmp[as_index: len(tmp)]
+                    as_index = tmp.index("as")
+                    column_index = as_index + 2
+                    header = tmp[column_index:len(tmp)]
                 elif "." in tmp:
                     dot_index = tmp.index(".") + 1
                     header = tmp[dot_index:len(tmp)]
                 else:
                     header = tmp
 
-                excel_file_header.append(header)
+                excel_file_header.append(re.sub("'", "", header.strip()))
 
             cls.logger.info("header:" + str(excel_file_header))
         return excel_file_header
