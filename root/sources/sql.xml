@@ -646,7 +646,7 @@
         </sql>
         <scheduler>* * * * *</scheduler>
     </config>
-     <config name="get_one_beeyo_skuId_but_more_than_one_sku_of_same_buyer_products" running="true">
+    <config name="get_one_beeyo_skuId_but_more_than_one_sku_of_same_buyer_products" running="true">
         <biz_email>
             <to>chris.li@allsale.site</to>
             <cc>chris.li@allsale.site</cc>
