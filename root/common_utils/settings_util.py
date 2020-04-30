@@ -8,7 +8,7 @@ class SettingsUtil:
     __instance = None
 
     __const = Const()
-    __const.MYSQL_SECTION = "mysql_test"
+    __const.MYSQL_SECTION = "mysql_dev"
     # __const.MYSQL_SECTION = "mysql_prod"
     __const.EMAIL_SECTION = "email"
 
