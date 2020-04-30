@@ -51,11 +51,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>商户下架但在买手上架的货源商品</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户下架但在买手上架的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户下架但在买手上架的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
              tmm.shop as '商户供应商名称',
@@ -95,7 +91,8 @@
             GROUP BY
              tmps.id
             ORDER BY
-            tmp.create_date DESC, tdsg.update_date desc;]]>
+            tmp.create_date DESC, tdsg.update_date desc
+        ]]>
         </sql>
         <scheduler>* * * * *</scheduler>
     </config>
@@ -109,11 +106,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>超过48小时未成功拒单的货源订单[包括自动采购]</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，超过48小时未成功拒单的货源订单&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，超过48小时未成功拒单的货源订单&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
             sp.shop as '商户供应商名称',
@@ -186,11 +179,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>超过48小时未成功拒单的非货源订单</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，超过48小时未成功拒单的非货源订单&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，超过48小时未成功拒单的非货源订单&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
              oi.goods_name as '买手商品名称',
@@ -249,11 +238,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>规格值重复但已同步买手后台的上架的货源商品</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，规格值重复但已同步买手后台上架的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，规格值重复但已同步买手后台上架的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;条，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
                 inn.beeyoshop AS '比柚商户名称',
@@ -323,12 +308,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>商户商品规格值个数和买手后台对应商品规格值个数不相等但已同步买手后台已上货的货源商品</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户商品规格值个数和买手后台对应商品规格值个数不相等,
-            但已同步买手后台已上货的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户商品规格值个数和买手后台对应商品规格值个数不相等,但已同步买手后台已上货的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
             mm.shop as '比柚商户名称',
@@ -388,12 +368,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>供应商店铺已下架但仍有状态未流转到已完成的订单</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户商品规格值个数和买手后台对应商品规格值个数不相等,
-            但已同步买手后台已上货的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户商品规格值个数和买手后台对应商品规格值个数不相等,但已同步买手后台已上货的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
              tmm.shop AS '彼柚店铺名称',
@@ -443,11 +418,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>手动插入商户系统但未同步买手后台的已上架货源商品</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，手动插入商户系统但未同步买手后台的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，手动插入商户系统但未同步买手后台的货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
              tmm.shop as '彼柚店铺名称',
@@ -478,11 +449,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>商户系统不同规格的批发价与买手各规格批发价不相等的已上架货源商品</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户系统不同规格的批发价与买手各规格批发价不相等的已上架货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，商户系统不同规格的批发价与买手各规格批发价不相等的已上架货源商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
              tmm.shop AS '商户供应商名称',
@@ -529,11 +496,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>买手代购店铺商品主图为空的商品</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，买手代购店铺商品主图为空的商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，买手代购店铺商品主图为空的商品&lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
             SELECT
             bu.buy_name '代购店铺名称',
@@ -563,11 +526,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>相同比柚skuid对应买手不同的货源下的sku</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，相同比柚skuid对应买手不同的货源下的sku &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，相同比柚skuid对应买手不同的货源下的sku &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
            SELECT
                 inn.gid AS '买手货源id',
@@ -656,11 +615,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>相同比柚skuid对应买手相同的货源下的不同sku </comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，相同比柚skuid对应买手相同的货源下的不同sku &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，相同比柚skuid对应买手相同的货源下的不同sku &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
           SELECT
             inn.gid AS '买手货源id',
@@ -749,11 +704,7 @@
             <cc>demon.zhou@allsale.site</cc>
         </tech_email>
         <comment>买手端多个商品关联同一货源商品</comment>
-        <email_body>
-            Dear All
-            <p/>
-            到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，买手端多个商品关联同一货源商品 &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件
-        </email_body>
+        <email_body>到&lt;font color="red"&gt;{time}&lt;/font&gt;为至，买手端多个商品关联同一货源商品 &lt;font color="red"&gt;{count}&lt;/font&gt;个，请及时处理，见附件</email_body>
         <sql><![CDATA[
            SELECT
              *

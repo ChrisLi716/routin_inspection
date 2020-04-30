@@ -92,6 +92,8 @@ class ParseXml:
                 comment = ele_config.find("./comment").text
                 email_body = ele_config.find("./email_body").text
 
+                ParseXml.logger.info("email_body:" + email_body)
+
                 sql = ele_config.find("./sql").text
                 if sql:
                     sql = re.sub("[\\s]+", " ", sql)

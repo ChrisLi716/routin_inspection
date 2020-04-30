@@ -50,7 +50,7 @@ class Dispatcher:
                 cls.logger.info("result_set_size:" + str(len(result_set)))
                 if result_set:
                     generate_excel_succeed = ExcelGenerator.generate_excel_file(header, result_set, file_path)
-                    file_tuple = (file_path,)
+                    file_tuple = file_path
                     if generate_excel_succeed:
                         if biz_email_to:
                             EmailUtils.sent_email(biz_email_to, biz_email_cc, comment,
